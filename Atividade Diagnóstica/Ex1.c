@@ -110,7 +110,7 @@ int findCarStack(STACK **root, int info, int action){
 
 void switchStack(){
     int opt = 10;
-    STACK *root = (STACK *) malloc(sizeof(STACK));
+    STACK *root = NULL;
 
     while (opt != 0) {
         opt = menuGeral();
@@ -154,6 +154,84 @@ void switchStack(){
                 printf("Opcao invalida. \n");
                 break;
         }
+    }
+}
+
+void pushQueue(QUEUE **head, QUEUE **tail, int info){
+    QUEUE *newNode = (QUEUE*)malloc(sizeof(QUEUE));
+    
+    newNode->info = info;
+    newNode->next = NULL;
+
+    if (*head == NULL)
+        *head = newNode;
+    else 
+        (*tail)->next = newNode;
+
+    *tail = newNode;
+}
+
+int popQueue(QUEUE **head, QUEUE **tail){
+    if (*head == NULL) { return 0; }
+
+    int info;
+
+    info = (*head)->info;
+    QUEUE *aux = *head;
+
+    *head = (*head)->next;
+
+    if (*head == NULL) { *tail == NULL; }
+
+    free(aux);
+    return info;
+}
+
+int findCarQueue(QUEUE **head, QUEUE **tail, int info, int action){
+    QUEUE *aux = *tail;
+    int info;
+    
+    while (*head != aux && (*head)->info != info) {
+        pushQueue(head, tail, popQueue(head, tail));
+    }
+    
+    if ((*head)->info == info) {
+        switch (action) {
+            case 1:
+                info = popQueue(head, tail);
+                break;
+            
+            case 2:
+                info = (*head)->info;
+                break;
+        }
+    } else { info = 0; }
+    
+    while (*head != aux) {
+        pushQueue(head, tail, popQueue(head, tail));
+    }
+
+    return info;
+}
+
+void switchQueue(){
+    int opt = 10;
+    QUEUE *head = NULL;
+    QUEUE *tail = NULL;
+    
+    while (opt != 0) {
+        opt = menuGeral();
+        switch (opt) {
+            case 1:
+
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            default:
+                break;
+        }    
     }
 }
 
