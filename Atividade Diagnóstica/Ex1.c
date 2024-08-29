@@ -223,11 +223,34 @@ void switchQueue(){
         opt = menuGeral();
         switch (opt) {
             case 1:
+                int info = getInfo();
+                pushQueue(&head, &tail, info);
+                break;
 
-                break;
             case 2:
+                if (head == NULL) { printf("Estacionamento vazio!\n"); }
+                else {
+                    int info = getInfo();
+                    info = findCarQueue(&head, &tail, info, 1);
+                    
+                    if (info == 0)
+                        printf("Carro nao encontrado!\n");
+                    else
+                        prixntf("Carro removido: %d\n", info);
+                }
                 break;
+
             case 3:
+                if (head == NULL) { printf("Estacionamento vazio!\n"); }
+                else {
+                    int info = getInfo();
+                    info = findCarQueue(&head, &tail, info, 2);
+                    
+                    if (info == 0)
+                        printf("Carro nao encontrado! \n");
+                    else
+                        prixntf("Carro encontrado! \n");
+                }
                 break;
             default:
                 break;
