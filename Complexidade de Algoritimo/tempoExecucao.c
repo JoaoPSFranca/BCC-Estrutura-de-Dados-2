@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#define tam1 5000
-#define tam2 10000
+#define tam1 10000 // 344 - 6 min
+#define tam2 20000 // 2519 - 41 min
 
 int conta(int *a, int n){
     int cont = 0; 
