@@ -17,6 +17,7 @@ void swap(int *a, int *b){
     *b = temp; 
 }
 
+// Vai jogando o maior sempre pro final
 void bubbleSort(int *vet, int max, int *contador){ 
     if (max < 1) return; 
     
@@ -31,6 +32,7 @@ void bubbleSort(int *vet, int max, int *contador){
     bubbleSort(vet, max-1, contador); 
 }
 
+// Vai rodando o vetor inteiro e procurando o menor depois colocando na posição mais baixa
 void selection_sort(int *vet, int max, int *contador) { 
     int i, j, min, aux;
     
