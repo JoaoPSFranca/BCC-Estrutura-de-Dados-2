@@ -1,6 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/*
+Shell sort
+    enquanto gap < max
+        gap = 3 * gap + 1
+    roda enquanto gap < 0
+        roda o for de gap até max 
+        aumentando de gap em gap 
+            aux = v[i]
+            faz o negócio da inserca (da direita pra esquerda)
+            v[j] = aux
+        faz gap /= 3
+*/
+
 void shell_sort(int array[], int length){
     int 
         gap = 1,
@@ -17,7 +30,7 @@ void shell_sort(int array[], int length){
             j = i;
             tmp = array[i];
  
-            //
+            // Método de Inserção
             while ((j >= gap) && (tmp < array[j - gap])) {
                 array[j] = array[j - gap];
                 j -= gap;

@@ -37,26 +37,22 @@ void heapsort(int a[], int n) {
 }
 
 // função que realiza a troca entre dois elementos
-void troca(int vet[], int i, int j)
-{
+void troca(int vet[], int i, int j) {
 	int aux = vet[i];
 	vet[i] = vet[j];
 	vet[j] = aux;
 }
 
 // particiona e retorna o índice do pivô
-int particiona(int vet[], int inicio, int fim)
-{
+int particiona(int vet[], int inicio, int fim) {
 	int pivo, pivo_indice, i;
 	
 	pivo = vet[fim]; // o pivô é sempre o último elemento
 	pivo_indice = inicio;
 	
-	for(i = inicio; i < fim; i++)
-	{
+	for(i = inicio; i < fim; i++) {
 		// verifica se o elemento é <= ao pivô
-		if(vet[i] <= pivo)
-		{
+		if(vet[i] <= pivo) {
 			// realiza a troca
 			troca(vet, i, pivo_indice);
 			// incrementa o pivo_indice
@@ -72,8 +68,7 @@ int particiona(int vet[], int inicio, int fim)
 }
 
 // escolhe um pivô aleatório para evitar o pior caso do quicksort
-int particiona_random(int vet[], int inicio, int fim)
-{
+int particiona_random(int vet[], int inicio, int fim) {
 	// seleciona um número entre fim (inclusive) e inicio (inclusive)
 	int pivo_indice = (rand() % (fim - inicio + 1)) + inicio;
 	
@@ -83,10 +78,8 @@ int particiona_random(int vet[], int inicio, int fim)
 	return particiona(vet, inicio, fim);
 }
 
-void quick_sort(int vet[], int inicio, int fim)
-{
-	if(inicio < fim)
-	{
+void quick_sort(int vet[], int inicio, int fim) {
+	if(inicio < fim) {
 		// função particionar retorna o índice do pivô
 		int pivo_indice = particiona_random(vet, inicio, fim);
 		
