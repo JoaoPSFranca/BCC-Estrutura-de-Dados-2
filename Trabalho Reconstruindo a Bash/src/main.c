@@ -3,47 +3,43 @@
 #include <string.h>
 #include <ctype.h>
 
-#define MAX_I_NODE 30
-#define MAX_BLOCKS 60
-#define BLOCK_SIZE 8
+#include "../lib/Block.h"
+#include "../lib/Inode.h"
+#include "../lib/Directory.h"
 
-typedef struct sBlock{
-    int address;
-    int status;
-} Block;
-
-typedef struct sINode{
-    int id;
-    char type;
-    char name[256];
-    int size;
-    Block blocks[15];
-} INode;
-
-typedef struct sFreeBlock{
-    Block *block;
-    struct sFreeBlock *back;
-    struct sFreeBlock *next;
-} FreeBlock;
+#define MAX_I_NODE 32
+#define MAX_BLOCKS (MAX_I_NODE*15)
+#define BLOCK_SIZE 4096
+#define MAX_FILENAME 256
 
 void generateBlocks(FreeBlock *fb){
+    fb = malloc(sizeof(FreeBlock));
+    FreeBlock *aux = fb;
+
     for (unsigned int i = 0; i < MAX_BLOCKS; i++){
         FILE *archive;
         char name_archive[70];
 
-        snprintf(name_archive, sizeof(name_archive), "../Blocks/%02d.dat", i);
+        snprintf(name_archive, sizeof(name_archive), "../Blocks/%02d.dat", i+1);
 
         archive = fopen(name_archive, "wb");
 
         if(archive != NULL){
-            Block block;
+            Block *block = malloc(sizeof(Block));
 
-            block.address = i;
-            block.status = 0;
+            block->address = i;
+            block->status = 0;
 
-            fwrite(&block, sizeof(Block), 1, archive);
+            fwrite(block, sizeof(Block), 1, archive);
             
             fclose(archive);
+
+            FreeBlock *aux2 = malloc(sizeof(FreeBlock)); 
+
+            aux->block = block;
+            aux->next = aux2;
+
+            aux = aux2;
         } else
             printf("Error opening file\n");
     }
@@ -56,12 +52,12 @@ void generateInodes(){
     
     if(archive != NULL){
         for (unsigned int i = 0; i < MAX_I_NODE; i++){
-            INode inode;
+            INode *inode = malloc(sizeof(INode));
 
-            inode.id = i;
-            inode.type = ((i % 2) ==  0) ? 'd' : 'r';
+            inode->id = i;
+            inode->type = ((i % 2) ==  0) ? 'd' : 'r';
 
-            fwrite(&inode, sizeof(INode), 1, archive);
+            fwrite(inode, sizeof(INode), 1, archive);
         }
 
         fclose(archive);
@@ -120,7 +116,7 @@ void bash(){
         } else if (!strcmp(comand, "run")) {
             
         } else if (strcmp(comand, "exit")) {
-            printf("%s comando nao reconhecido. \n", comand);
+            printf("%s comando nao reconhecido. ", comand);
         } 
         
     }
@@ -129,7 +125,7 @@ void bash(){
 
 int main(){
 
-    FreeBlock *freeBlock = NULL;
+    // FreeBlock *freeBlock = NULL;
 
     // generateInodes();
     // generateBlocks(freeBlock);
