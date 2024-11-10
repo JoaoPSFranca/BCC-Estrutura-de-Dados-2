@@ -7,12 +7,6 @@
 #define MAX_BLOCKS 60
 #define BLOCK_SIZE 8
 
-typedef struct sFreeBlock{
-    Block *block;
-    FreeBlock *back;
-    FreeBlock *next;
-} FreeBlock;
-
 typedef struct sBlock{
     int address;
     int status;
@@ -25,6 +19,12 @@ typedef struct sINode{
     int size;
     Block blocks[15];
 } INode;
+
+typedef struct sFreeBlock{
+    Block *block;
+    struct sFreeBlock *back;
+    struct sFreeBlock *next;
+} FreeBlock;
 
 void generateBlocks(FreeBlock *fb){
     for (unsigned int i = 0; i < MAX_BLOCKS; i++){
@@ -120,7 +120,7 @@ void bash(){
         } else if (!strcmp(comand, "run")) {
             
         } else if (strcmp(comand, "exit")) {
-            printf("%s comando nao reconhecido. ", comand);
+            printf("%s comando nao reconhecido. \n", comand);
         } 
         
     }
@@ -131,8 +131,8 @@ int main(){
 
     FreeBlock *freeBlock = NULL;
 
-    generateInodes();
-    generateBlocks(freeBlock);
+    // generateInodes();
+    // generateBlocks(freeBlock);
     bash();
 
 
