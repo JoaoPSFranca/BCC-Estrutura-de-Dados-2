@@ -6,7 +6,7 @@
 
 typedef struct sINode {
     int id;
-    char type;
+    char type; // 'r' regular file | 'd' directory file
     char name[MAX_FILENAME];
     long int size;
     int block_count;
@@ -14,12 +14,12 @@ typedef struct sINode {
 } INode;
 
 typedef struct sFreeINode {
-    int id; 
+    INode *inode; 
     struct sFreeINode *next; 
 } FreeINode;
 
 typedef struct sINodeList {
-    INode inode; 
+    INode *inode; 
     struct sINodeList *next; 
 } INodeList;
 
