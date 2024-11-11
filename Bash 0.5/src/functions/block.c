@@ -36,7 +36,7 @@ void generateBlocks(FreeBlock **freeBlocks){
 Block *verifyBlockFree(FreeBlock **freeBlocks){
     FreeBlock *aux = *freeBlocks;
 
-    while (!aux->block->status && aux != NULL)
+    while (aux->block->status != 0 && aux != NULL)
         aux = aux->next;
     
     if (aux == NULL)

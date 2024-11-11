@@ -43,12 +43,13 @@ INode *verifyINodeFree_Directory(FreeINode **freeInodes){
 }
 
 void removeINodeFree(FreeINode **freeInodes, INode *inode){
+
     if ((*freeInodes)->inode->id == inode->id) {
         (*freeInodes) = (*freeInodes)->next;
     } else {
         FreeINode *aux = *freeInodes;
         FreeINode *aux2 = NULL;
-    
+
         while (aux->inode->id != inode->id && aux != NULL){
             aux2 = aux;
             aux = aux->next;

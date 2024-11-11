@@ -4,12 +4,11 @@
 
 int verifyDirectory(const char name[]){
     struct stat st;
-    
     return (stat(name, &st) != 0 && S_ISDIR(st.st_mode));
 }
 
 int createDirectory(const char name[]){
-    if (!verifyDirectory(name) || mkdir(name, 0755))
+    if (verifyDirectory(name) || mkdir(name, 755))
         return 0;
 
     return 1;
@@ -29,11 +28,15 @@ Directory *addDirectory(INode *inode, Directory *parent){
     dir->parent = parent;
     dir->childs = NULL;
 
-    DirectoryList *dirList = malloc(sizeof(DirectoryList));
+    if(parent != NULL){
+        DirectoryList *dirList = malloc(sizeof(DirectoryList));
 
-    dirList->directory = dir;
-    dirList->next = parent->childs;
-    parent->childs = dirList;
+        dirList->directory = dir;
+        dirList->next = parent->childs;
+        parent->childs = dirList;
+
+        return dir;
+    }
 
     return dir;
 }
@@ -42,18 +45,18 @@ Directory *generateRoot(FreeINode **freeInodes, FreeBlock **freeBlocks){
     INode *inode = verifyINodeFree_Directory(freeInodes);
     Block *block = verifyBlockFree(freeBlocks);
 
-    removeINodeFree(freeInodes, inode);   
+    removeINodeFree(freeInodes, inode);
     removeBlockFree(freeBlocks, block);
 
     inode->block_count = 1;
     inode->blocks[0] = *block;
-    strcpy(inode->name, "root");
+    strcpy(inode->name, "c");
     inode->size = 0;
 
     Directory *root = malloc(sizeof(Directory));
     root->inode = inode;
     root->iNodeList = NULL;
-    strcpy(root->name, "root");
+    strcpy(root->name, "c");
     root->parent = NULL;
     root->childs = NULL;
 

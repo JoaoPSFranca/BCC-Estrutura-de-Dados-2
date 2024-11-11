@@ -17,8 +17,8 @@ void initFileSystem(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **
     generateBlocks(freeBlocks);
     generateInodes(freeInodes);
 
-    (*root) = generateRoot(freeInodes, freeBlocks);
-
+    *root = generateRoot(freeInodes, freeBlocks);
+    
     createDirectory("c"); // root directory 
     printf("Bash 0.5 [versao 2.6]\n\n");
 }
@@ -39,7 +39,7 @@ void format_path(char path[]){
 
 void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
     char 
-        comand[10], 
+        comand[10] = "", 
         argument[MAX_FILENAME], 
         entry[MAX_FILENAME * 2], 
         path[100];
@@ -59,6 +59,8 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
 
         fgets(entry, 50, stdin);
         sscanf(entry, "%s %s", comand, argument);
+
+        comand[strcspn(comand, "\n")] = 0; 
 
         format(comand);
 
@@ -94,7 +96,6 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
 }
 
 int main(){
-
     FreeBlock *freeBlocks = malloc(sizeof(FreeBlock));
     FreeINode *freeInodes = malloc(sizeof(FreeINode));
     Directory *root = NULL;
@@ -102,7 +103,6 @@ int main(){
     initFileSystem(&freeBlocks, &freeInodes, &root);
 
     bash(&freeBlocks, &freeInodes, &root);
-
-
+    
     return 0;
 }
