@@ -2,9 +2,14 @@
 
 #include "../lib/directory.h"
 
-int verifyDirectory(const char name[]){
+int verifyDirectory(const char name[]) {
     struct stat st;
-    return (stat(name, &st) != 0 && S_ISDIR(st.st_mode));
+
+    if (stat(name, &st) == 0) {
+        return S_ISDIR(st.st_mode);
+    }
+
+    return 0;
 }
 
 int createDirectory(const char name[]){
@@ -67,7 +72,10 @@ void function_mkdir(char path[], char argument[], FreeINode **freeInodes, FreeBl
                     INode inodes[], Directory *parent, Block blocks[], int *TLInodes, int *TLBlocks) {
     char dir_name[MAX_FILENAME * 2];
 
-    snprintf(dir_name, sizeof(dir_name), "c/%s/%s", path, argument);
+    if (path[0] != '\0')
+        snprintf(dir_name, sizeof(dir_name), "./c/%s/%s", path, argument);
+    else
+        snprintf(dir_name, sizeof(dir_name), "c/%s", argument);
     
     INode *inode = verifyINodeFree_Directory(freeInodes);
 
@@ -97,4 +105,8 @@ void function_mkdir(char path[], char argument[], FreeINode **freeInodes, FreeBl
             }
         } 
     }
+}
+
+void function_ls(char all[]){
+
 }

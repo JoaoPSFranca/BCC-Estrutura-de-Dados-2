@@ -1,0 +1,5 @@
+/c
+*.o
+*.exe
+/src/Blocks
+/src/Resources

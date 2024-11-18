@@ -3,11 +3,6 @@
         @ext:danielpinto8zz6.c-cpp-compile-run C-cpp-compile-run: Output-location 
     apague o campo caso esteja por padrão no output, deixe em .. */
 
-
-/*
-    Criar verificação se o arquivo existe na hora de dar o cd
-*/
-
 #include <string.h>
 #include <ctype.h>
 
@@ -76,18 +71,16 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
         if (!strcmp(comand, "mkdir")) {
             function_mkdir(path, argument, freeInodes, freeBlocks, inodes, actualDirectory, blocks, &TLInodes, &TLBlocks);
         } else if (!strcmp(comand, "cd")) {
-            if (path[0] != '\0')
-                snprintf(complete_path, sizeof(complete_path), "c/%s/%s", path, argument);
-            else
-                snprintf(complete_path, sizeof(complete_path), "c/%s", argument);
-
-            printf("%s\n", complete_path);
-
-            if (!strcmp(argument, ".."))
-                format_path(path);
-            else if (!strcmp(argument, "/"))
+            if (!strcmp(argument, "..")){
+                if (path[0] != '\0'){
+                    actualDirectory = actualDirectory->parent;
+                    format_path(path);
+                } else
+                    printf("Error: You are already in the root directory.\n");
+            } else if (!strcmp(argument, "/")){
                 path[0] = '\0';
-            else if (verifyDirectory(complete_path)){
+                actualDirectory = *root;
+            } else if (verifyDirectory(complete_path)){
                 if (path[0] != '\0'){
                     path[strlen(path)] = '/';
 
@@ -95,7 +88,13 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
                         path[strlen(path)-1] = '\0';
                 }
 
-                strcat(path, argument);
+                while (strcmp(actualDirectory->name, argument) && actualDirectory != NULL)
+                    actualDirectory = actualDirectory->childs->directory;
+
+                if (actualDirectory == NULL)
+                    printf("Directory exists, but not found in current file system. ");
+                else
+                    strcat(path, argument);
             } else 
                 printf("O sistema nao pode encontrar o caminho especificado. \n\n");
         } else if (!strcmp(comand, "ls")) {
