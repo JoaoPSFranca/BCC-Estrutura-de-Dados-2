@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define BLOCK_SIZE 4096
+#define BLOCK_SIZE 16
 #define MAX_I_NODE 32
 #define MAX_BLOCKS (MAX_I_NODE*15)
 

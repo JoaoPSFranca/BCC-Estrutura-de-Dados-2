@@ -27,8 +27,9 @@ void generateBlocks(FreeBlock **freeBlocks){
             } else {
                 aux->next = NULL; 
             }
+            free(block);
         } else {
-            printf("Error opening file\n");
+            printf("Error opening file. \n");
         }
     }
 }

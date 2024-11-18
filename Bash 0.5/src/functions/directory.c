@@ -67,7 +67,7 @@ void function_mkdir(char path[], char argument[], FreeINode **freeInodes, FreeBl
                     INode inodes[], Directory *parent, Block blocks[], int *TLInodes, int *TLBlocks) {
     char dir_name[MAX_FILENAME * 2];
 
-    snprintf(dir_name, sizeof(dir_name), "c/%s%s", path, argument);
+    snprintf(dir_name, sizeof(dir_name), "c/%s/%s", path, argument);
     
     INode *inode = verifyINodeFree_Directory(freeInodes);
 
@@ -80,7 +80,7 @@ void function_mkdir(char path[], char argument[], FreeINode **freeInodes, FreeBl
             printf("Nenhum Bloco disponivel. \n");
         } else {
             if (!createDirectory(dir_name)) {
-                printf("Erro ao criar o diretorio %s. %s\n", argument, dir_name);
+                printf("Erro ao criar o diretorio %s. %s\n\n", argument, dir_name);
             } else {
                 removeINodeFree(freeInodes, inode);   
                 removeBlockFree(freeBlocks, block);
