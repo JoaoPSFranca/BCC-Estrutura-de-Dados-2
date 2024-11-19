@@ -13,10 +13,11 @@ int verifyDirectory(const char name[]) {
 }
 
 int createDirectory(const char name[]){
-    if (verifyDirectory(name) || mkdir(name, 755))
-        return 0;
+    if (!verifyDirectory(name))
+        if (!mkdir(name, 755))
+            return 1;
 
-    return 1;
+    return 0;
 }
 
 Directory *addDirectory(INode *inode, Directory *parent){
@@ -80,15 +81,15 @@ void function_mkdir(char path[], char argument[], FreeINode **freeInodes, FreeBl
     INode *inode = verifyINodeFree_Directory(freeInodes);
 
     if (inode == NULL)
-        printf("Nenhum INode disponivel. \n");
+        printf("No Free INode avaible. \n");
     else {
         Block *block = verifyBlockFree(freeBlocks);
 
         if (block == NULL) {
-            printf("Nenhum Bloco disponivel. \n");
+            printf("No Free Blocks avaible. \n");
         } else {
             if (!createDirectory(dir_name)) {
-                printf("Erro ao criar o diretorio %s. %s\n\n", argument, dir_name);
+                printf("Error: Could not create the directory '%s'. \n\n", argument);
             } else {
                 removeINodeFree(freeInodes, inode);   
                 removeBlockFree(freeBlocks, block);
@@ -107,6 +108,6 @@ void function_mkdir(char path[], char argument[], FreeINode **freeInodes, FreeBl
     }
 }
 
-void function_ls(char all[]){
+// void function_ls(char all[]){
 
-}
+// }

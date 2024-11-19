@@ -61,7 +61,7 @@ void removeBlockFree(FreeBlock **freeBlocks, Block *block){
         if (aux != NULL)
             aux2->next = aux->next;
         else
-            printf("Bloco nao encontrado. \n");
+            printf("Block not found. \n");
     }
 }
 

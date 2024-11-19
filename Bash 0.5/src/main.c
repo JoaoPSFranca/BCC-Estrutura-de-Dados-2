@@ -71,6 +71,11 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
         if (!strcmp(comand, "mkdir")) {
             function_mkdir(path, argument, freeInodes, freeBlocks, inodes, actualDirectory, blocks, &TLInodes, &TLBlocks);
         } else if (!strcmp(comand, "cd")) {
+            if (path[0] != '\0')
+                snprintf(complete_path, sizeof(complete_path), "./c/%s/%s", path, argument);
+            else
+                snprintf(complete_path, sizeof(complete_path), "c/%s", argument);
+
             if (!strcmp(argument, "..")){
                 if (path[0] != '\0'){
                     actualDirectory = actualDirectory->parent;
@@ -88,15 +93,15 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
                         path[strlen(path)-1] = '\0';
                 }
 
-                while (strcmp(actualDirectory->name, argument) && actualDirectory != NULL)
+                while (strcmp(actualDirectory->name, argument) && actualDirectory != *root && actualDirectory != NULL)
                     actualDirectory = actualDirectory->childs->directory;
 
-                if (actualDirectory == NULL)
-                    printf("Directory exists, but not found in current file system. ");
+                if (actualDirectory == NULL || actualDirectory == *root)
+                    printf("Directory exists, but not found in current file system. \n\n");
                 else
                     strcat(path, argument);
             } else 
-                printf("O sistema nao pode encontrar o caminho especificado. \n\n");
+                printf("The system could not find the specified path. \n\n");
         } else if (!strcmp(comand, "ls")) {
             
         } else if (!strcmp(comand, "cat")) {
@@ -112,7 +117,7 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
         } else if (!strcmp(comand, "cls") || !strcmp(comand, "clear")){
             system("cls");
         } else if (strcmp(comand, "exit")) {
-            printf("%s comando nao reconhecido. \n\n", comand);
+            printf("%s comand not recognized. \n\n", comand);
         } 
         
     }
