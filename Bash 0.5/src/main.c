@@ -93,13 +93,13 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
                         path[strlen(path)-1] = '\0';
                 }
 
-                while (strcmp(actualDirectory->name, argument) && actualDirectory != *root && actualDirectory != NULL)
-                    actualDirectory = actualDirectory->childs->directory;
+                // while (strcmp(actualDirectory->name, argument) && actualDirectory != *root && actualDirectory != NULL)
+                //     actualDirectory = actualDirectory->childs->;
 
-                if (actualDirectory == NULL || actualDirectory == *root)
-                    printf("Directory exists, but not found in current file system. \n\n");
-                else
-                    strcat(path, argument);
+                // if (actualDirectory == NULL || actualDirectory == *root)
+                //     printf("Directory exists, but not found in current file system. \n\n");
+                // else
+                //     strcat(path, argument);
             } else 
                 printf("The system could not find the specified path. \n\n");
         } else if (!strcmp(comand, "ls")) {

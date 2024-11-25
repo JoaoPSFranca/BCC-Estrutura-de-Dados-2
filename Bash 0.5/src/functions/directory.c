@@ -108,6 +108,14 @@ void function_mkdir(char path[], char argument[], FreeINode **freeInodes, FreeBl
     }
 }
 
-// void function_ls(char all[]){
+// void function_ls(char all[][2][MAX_FILENAME], Directory *actualDirectory, int *count){
+//     INodeList *aux = actualDirectory->iNodeList;
+    
 
+
+//     while(aux != NULL){
+//         strcpy(all[*count][1], aux->inode->name);
+//         (*count)++;
+//         aux = aux->next;
+//     }
 // }

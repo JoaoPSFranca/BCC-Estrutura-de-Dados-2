@@ -18,7 +18,7 @@ caracteres alfanuméricos (pode ser menos).
 #include <string.h>
 
 #define TAMCOD 5
-#define TABLE_SIZE 10
+#define TABLE_SIZE 11
 
 typedef struct Carta {
     char codigo[TAMCOD + 1]; 
