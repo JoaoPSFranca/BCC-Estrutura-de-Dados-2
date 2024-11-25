@@ -7,6 +7,7 @@
         "directory.h": "c",
         "stat.h": "c",
         "inode.h": "c",
-        "ctype.h": "c"
+        "ctype.h": "c",
+        "algorithm": "c"
     }
 }

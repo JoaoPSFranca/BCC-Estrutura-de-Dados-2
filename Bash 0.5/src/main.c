@@ -39,6 +39,16 @@ void format_path(char path[]){
     path[i] = '\0';
 }
 
+void print_ls(char all[][2][MAX_FILENAME], int countDir, int countReg){
+    int i;
+    
+    for (i = 0; i < countDir; i++)
+        printf("%s\n", all[i][0]);
+    
+    for (i = 0; i < countReg; i++)
+        printf("%s\n", all[i][1]);
+}
+
 void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
     
     char 
@@ -93,17 +103,21 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
                         path[strlen(path)-1] = '\0';
                 }
 
-                // while (strcmp(actualDirectory->name, argument) && actualDirectory != *root && actualDirectory != NULL)
-                //     actualDirectory = actualDirectory->childs->;
+                while (strcmp(actualDirectory->name, argument) && actualDirectory != NULL){
+                    actualDirectory = actualDirectory->childs->directory;
+                }
 
-                // if (actualDirectory == NULL || actualDirectory == *root)
-                //     printf("Directory exists, but not found in current file system. \n\n");
-                // else
-                //     strcat(path, argument);
+                if (actualDirectory == NULL || actualDirectory == *root)
+                    printf("Directory exists, but not found in current file system. \n\n");
+                else
+                    strcat(path, argument);
             } else 
                 printf("The system could not find the specified path. \n\n");
         } else if (!strcmp(comand, "ls")) {
-            
+            char all[MAX_I_NODE][2][FILENAME_MAX];
+            int countReg, countDir;
+            function_ls(all, actualDirectory, &countDir, &countReg);
+            print_ls(all, countDir, countReg);
         } else if (!strcmp(comand, "cat")) {
             
         } else if (!strcmp(comand, "rm")) {

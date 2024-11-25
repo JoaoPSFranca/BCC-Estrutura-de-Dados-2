@@ -20,6 +20,15 @@ int createDirectory(const char name[]){
     return 0;
 }
 
+void printList(INodeList *inodelist){
+    INodeList *aux = inodelist;
+    
+    while (aux != NULL) {
+        printf("%s\n", aux->inode->name);
+        aux = aux->next;
+    }
+}
+
 Directory *addDirectory(INode *inode, Directory *parent){
     Directory *dir = malloc(sizeof(Directory));
     INodeList *inodeList = malloc(sizeof(INodeList));
@@ -40,7 +49,13 @@ Directory *addDirectory(INode *inode, Directory *parent){
         dirList->directory = dir;
         dirList->next = parent->childs;
         parent->childs = dirList;
+        
+        INodeList *aux = parent->iNodeList;
 
+        while (aux->next != NULL)
+            aux = aux->next;
+
+        aux->next = inodeList;
         return dir;
     }
 
@@ -50,6 +65,10 @@ Directory *addDirectory(INode *inode, Directory *parent){
 Directory *generateRoot(FreeINode **freeInodes, FreeBlock **freeBlocks){
     INode *inode = verifyINodeFree_Directory(freeInodes);
     Block *block = verifyBlockFree(freeBlocks);
+    INodeList *inodeList = malloc(sizeof(INodeList));
+
+    inodeList->inode = inode;
+    inodeList->next = NULL;
 
     removeINodeFree(freeInodes, inode);
     removeBlockFree(freeBlocks, block);
@@ -61,9 +80,10 @@ Directory *generateRoot(FreeINode **freeInodes, FreeBlock **freeBlocks){
 
     Directory *root = malloc(sizeof(Directory));
     root->inode = inode;
-    root->iNodeList = NULL;
+    root->iNodeList = inodeList;
+
     strcpy(root->name, "c");
-    root->parent = NULL;
+    root->parent = root;
     root->childs = NULL;
 
     return root;
@@ -108,14 +128,23 @@ void function_mkdir(char path[], char argument[], FreeINode **freeInodes, FreeBl
     }
 }
 
-// void function_ls(char all[][2][MAX_FILENAME], Directory *actualDirectory, int *count){
-//     INodeList *aux = actualDirectory->iNodeList;
-    
+void function_ls(char all[][2][MAX_FILENAME], Directory *actualDirectory, int *countDir, int *countReg){
+    INodeList *aux = actualDirectory->iNodeList->next;
 
+    strcpy(all[0][0], ".");
+    strcpy(all[1][0], "..");
+    *countDir = 2;
+    *countReg = 0;
 
-//     while(aux != NULL){
-//         strcpy(all[*count][1], aux->inode->name);
-//         (*count)++;
-//         aux = aux->next;
-//     }
-// }
+    while(aux != NULL){
+        if (aux->inode->type == 'r'){
+            strcpy(all[*countReg][1], aux->inode->name); 
+            (*countReg)++;
+        } else {
+            strcpy(all[*countDir][0], aux->inode->name); 
+            (*countDir)++;
+        }
+
+        aux = aux->next;
+    }
+}
