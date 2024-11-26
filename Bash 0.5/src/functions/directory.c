@@ -20,12 +20,18 @@ int createDirectory(const char name[]){
     return 0;
 }
 
-void printList(INodeList *inodelist){
-    INodeList *aux = inodelist;
-    
-    while (aux != NULL) {
-        printf("%s\n", aux->inode->name);
-        aux = aux->next;
+void remove_dir(const char dirName[], const char path[]) {
+    char completePath[MAX_FILENAME];
+
+    if (path[0] != '\0')
+        snprintf(completePath, sizeof(completePath), "rmdir c\\%s\\%s", path, dirName);
+    else
+        snprintf(completePath, sizeof(completePath), "rmdir c\\%s", dirName);
+
+    if (system(completePath)) {
+        printf("Erro ao executar o comando");
+    } else {
+        printf("Diretorio removido com sucesso: %s\n", completePath);
     }
 }
 
@@ -47,15 +53,27 @@ Directory *addDirectory(INode *inode, Directory *parent){
         DirectoryList *dirList = malloc(sizeof(DirectoryList));
 
         dirList->directory = dir;
-        dirList->next = parent->childs;
-        parent->childs = dirList;
+        dirList->next = NULL;
+
+        if(parent->childs != NULL){
+            DirectoryList *aux = parent->childs;
+
+            while (aux->next != NULL)
+                aux = aux->next;
+
+            aux->next = dirList;
+        } else
+            parent->childs = dirList;
         
-        INodeList *aux = parent->iNodeList;
+        INodeList *aux2 = parent->iNodeList;
 
-        while (aux->next != NULL)
-            aux = aux->next;
+        while (aux2->next != NULL)
+            aux2 = aux2->next;
 
-        aux->next = inodeList;
+        aux2->next = inodeList;
+
+        (parent->childs_cont)++;
+
         return dir;
     }
 
@@ -94,7 +112,7 @@ void function_mkdir(char path[], char argument[], FreeINode **freeInodes, FreeBl
     char dir_name[MAX_FILENAME * 2];
 
     if (path[0] != '\0')
-        snprintf(dir_name, sizeof(dir_name), "./c/%s/%s", path, argument);
+        snprintf(dir_name, sizeof(dir_name), "c/%s/%s", path, argument);
     else
         snprintf(dir_name, sizeof(dir_name), "c/%s", argument);
     
@@ -128,8 +146,8 @@ void function_mkdir(char path[], char argument[], FreeINode **freeInodes, FreeBl
     }
 }
 
-void function_ls(char all[][2][MAX_FILENAME], Directory *actualDirectory, int *countDir, int *countReg){
-    INodeList *aux = actualDirectory->iNodeList->next;
+void function_ls(char all[][2][MAX_FILENAME], Directory *currentDirectory, int *countDir, int *countReg){
+    INodeList *aux = currentDirectory->iNodeList->next;
 
     strcpy(all[0][0], ".");
     strcpy(all[1][0], "..");
@@ -147,4 +165,16 @@ void function_ls(char all[][2][MAX_FILENAME], Directory *actualDirectory, int *c
 
         aux = aux->next;
     }
+}
+
+void function_rmdir(char dirName[], Directory *currentDirectory, char path[]){
+    // Directory *previous = NULL;
+    // DirectoryList *toRemove = currentDirectory->childs;
+
+    // while (toRemove != NULL && strcmp(toRemove->directory->name, dirName)) {
+    //     previous = toRemove;
+    //     toRemove = toRemove->next;
+    // }
+    
+    remove_dir(dirName, path);
 }

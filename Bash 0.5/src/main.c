@@ -32,8 +32,8 @@ void format_path(char path[]){
     unsigned int i = strlen(path) - 1;
     
     while (path[i] != '/' && i > 0){
-        i--;
         path[i] = '\0';
+        i--;
     }
     
     path[i] = '\0';
@@ -63,7 +63,7 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
 
     printf("amo o jorg\n");
     INode inodes[MAX_I_NODE]; // Used INodes
-    Directory *actualDirectory = *root;
+    Directory *currentDirectory = *root;
     Block blocks[MAX_BLOCKS]; // Used Blocks
     
     path[0] = '\0';
@@ -79,7 +79,7 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
         format(comand);
 
         if (!strcmp(comand, "mkdir")) {
-            function_mkdir(path, argument, freeInodes, freeBlocks, inodes, actualDirectory, blocks, &TLInodes, &TLBlocks);
+            function_mkdir(path, argument, freeInodes, freeBlocks, inodes, currentDirectory, blocks, &TLInodes, &TLBlocks);
         } else if (!strcmp(comand, "cd")) {
             if (path[0] != '\0')
                 snprintf(complete_path, sizeof(complete_path), "./c/%s/%s", path, argument);
@@ -88,13 +88,13 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
 
             if (!strcmp(argument, "..")){
                 if (path[0] != '\0'){
-                    actualDirectory = actualDirectory->parent;
+                    currentDirectory = currentDirectory->parent;
                     format_path(path);
                 } else
                     printf("Error: You are already in the root directory.\n");
             } else if (!strcmp(argument, "/")){
                 path[0] = '\0';
-                actualDirectory = *root;
+                currentDirectory = *root;
             } else if (verifyDirectory(complete_path)){
                 if (path[0] != '\0'){
                     path[strlen(path)] = '/';
@@ -103,27 +103,30 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
                         path[strlen(path)-1] = '\0';
                 }
 
-                while (strcmp(actualDirectory->name, argument) && actualDirectory != NULL){
-                    actualDirectory = actualDirectory->childs->directory;
+                DirectoryList *aux = currentDirectory->childs;
+                while (strcmp(aux->directory->name, argument) && aux != NULL){
+                    aux = aux->next;
                 }
 
-                if (actualDirectory == NULL || actualDirectory == *root)
+                if (aux == NULL || aux->directory == *root)
                     printf("Directory exists, but not found in current file system. \n\n");
-                else
+                else{
+                    currentDirectory = aux->directory;
                     strcat(path, argument);
+                }
             } else 
                 printf("The system could not find the specified path. \n\n");
         } else if (!strcmp(comand, "ls")) {
             char all[MAX_I_NODE][2][FILENAME_MAX];
             int countReg, countDir;
-            function_ls(all, actualDirectory, &countDir, &countReg);
+            function_ls(all, currentDirectory, &countDir, &countReg);
             print_ls(all, countDir, countReg);
         } else if (!strcmp(comand, "cat")) {
             
         } else if (!strcmp(comand, "rm")) {
             
         } else if (!strcmp(comand, "rmdir")) {
-            
+            function_rmdir(argument, currentDirectory, path);
         } else if (!strcmp(comand, "mv")) {
             
         } else if (!strcmp(comand, "run")) {
