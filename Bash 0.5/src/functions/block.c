@@ -35,15 +35,49 @@ void generateBlocks(FreeBlock **freeBlocks){
 }
 
 Block *verifyBlockFree(FreeBlock **freeBlocks){
+    printf("Teste 3.1\n");
     FreeBlock *aux = *freeBlocks;
 
     while (aux->block->status != 0 && aux != NULL)
         aux = aux->next;
     
+    printf("Teste 3.3\n");
     if (aux == NULL)
         return NULL;
     
+    printf("Teste 3.4\n");
     return aux->block;
+}
+
+void alterBlockDat(Block *block){
+    FILE *archive;
+    char filename[70];
+    
+    strcpy(filename, block->address);
+    archive = fopen(filename, "wb");
+
+    if (archive != NULL) {
+        fwrite(block, sizeof(Block), 1, archive);
+        fclose(archive);
+    } else
+        printf("Error opening file. \n");
+}
+
+void enterFreeBlock(FreeBlock **freeBlock, Block *block){
+    block->status = 0;
+
+    FreeBlock *aux = *freeBlock;
+
+    while (aux != NULL)
+        aux = aux->next;
+    
+    FreeBlock *newFreeBlock = malloc(sizeof(FreeBlock));
+
+    newFreeBlock->block = block;
+    newFreeBlock->next = NULL;
+    aux = newFreeBlock;
+
+    alterBlockDat(block);
 }
 
 void removeBlockFree(FreeBlock **freeBlocks, Block *block){
@@ -58,8 +92,15 @@ void removeBlockFree(FreeBlock **freeBlocks, Block *block){
             aux = aux->next; 
         }
 
-        if (aux != NULL)
-            aux2->next = aux->next;
+        if (aux != NULL){
+            if (aux2 == NULL)
+                freeBlocks = &aux;    
+            else
+                aux2->next = aux->next;
+
+            aux->block->status = 1;
+            alterBlockDat(block);
+        }
         else
             printf("Block not found. \n");
     }

@@ -126,7 +126,7 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
         } else if (!strcmp(comand, "rm")) {
             
         } else if (!strcmp(comand, "rmdir")) {
-            function_rmdir(argument, currentDirectory, path);
+            function_rmdir(argument, currentDirectory, path, freeBlocks, freeInodes);
         } else if (!strcmp(comand, "mv")) {
             
         } else if (!strcmp(comand, "run")) {

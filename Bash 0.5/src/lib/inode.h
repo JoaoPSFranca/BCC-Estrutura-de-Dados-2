@@ -7,6 +7,7 @@
 typedef struct sINode {
     int id;
     char type; // 'r' regular file | 'd' directory file
+    int status; // 0 free | 1 busy
     char name[MAX_FILENAME];
     long int size;
     int block_count;

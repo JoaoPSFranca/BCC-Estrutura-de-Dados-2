@@ -20,7 +20,7 @@ int createDirectory(const char name[]){
     return 0;
 }
 
-void remove_dir(const char dirName[], const char path[]) {
+void remove_dir(const char dirName[], const char path[], FreeBlock *fb) {
     char completePath[MAX_FILENAME];
 
     if (path[0] != '\0')
@@ -33,6 +33,8 @@ void remove_dir(const char dirName[], const char path[]) {
     } else {
         printf("Diretorio removido com sucesso: %s\n", completePath);
     }
+
+    printf("teste 4: %d\n", fb->block->status);
 }
 
 Directory *addDirectory(INode *inode, Directory *parent){
@@ -122,14 +124,16 @@ void function_mkdir(char path[], char argument[], FreeINode **freeInodes, FreeBl
         printf("No Free INode avaible. \n");
     else {
         Block *block = verifyBlockFree(freeBlocks);
+        printf("teste 3.5\n");
 
         if (block == NULL) {
             printf("No Free Blocks avaible. \n");
         } else {
+            printf("Teste4\n");
             if (!createDirectory(dir_name)) {
                 printf("Error: Could not create the directory '%s'. \n\n", argument);
             } else {
-                removeINodeFree(freeInodes, inode);   
+                removeINodeFree(freeInodes, inode);
                 removeBlockFree(freeBlocks, block);
 
                 inode->block_count = 1;
@@ -167,14 +171,42 @@ void function_ls(char all[][2][MAX_FILENAME], Directory *currentDirectory, int *
     }
 }
 
-void function_rmdir(char dirName[], Directory *currentDirectory, char path[]){
-    // Directory *previous = NULL;
-    // DirectoryList *toRemove = currentDirectory->childs;
+void function_rmdir(char dirName[], Directory *currentDirectory, char path[], FreeBlock **freeBlock, FreeINode **freeINode){
+    DirectoryList *previous = NULL;
+    DirectoryList *toRemove = currentDirectory->childs;
 
-    // while (toRemove != NULL && strcmp(toRemove->directory->name, dirName)) {
-    //     previous = toRemove;
-    //     toRemove = toRemove->next;
-    // }
-    
-    remove_dir(dirName, path);
+    while (toRemove != NULL && strcmp(toRemove->directory->name, dirName)) {
+        previous = toRemove;
+        toRemove = toRemove->next;
+    }
+
+    if(toRemove == NULL)
+        printf("Erro: directory '%s' not found.\n\n", dirName);
+    else{
+        Directory *dirToRemove = toRemove->directory;
+        
+        if (dirToRemove->iNodeList->next != NULL)
+            printf("Erro: directory '%s' is not empty. %s\n\n", dirName, dirToRemove->parent->inode->name);
+        else{
+            if(previous == NULL)
+                currentDirectory->childs = toRemove->next;
+            else 
+                previous->next = toRemove->next;
+            
+            INode *aux = dirToRemove->inode;
+            int i;
+
+            for (i = 0; i < aux->block_count; i++)
+                enterFreeBlock(freeBlock, &(aux->blocks[i]));
+            
+            enterINodeFree(freeINode, aux);
+
+            free(dirToRemove);
+            free(toRemove);
+            // remove_dir(dirName, path, *freeBlock);
+
+            printf("teste 2: %d\n", (*freeBlock)->block->status);
+        }
+    }
 }
+
