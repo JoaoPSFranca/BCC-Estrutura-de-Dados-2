@@ -45,7 +45,6 @@ INode *verifyINodeFree_Directory(FreeINode **freeInodes){
 
 void alterINodeDat(INode *inode){
     FILE *archive;
-    
     archive = fopen("src/Resources/INodes.dat", "rb+");
 
     if (archive != NULL) {
@@ -69,7 +68,7 @@ void alterINodeDat(INode *inode){
         
         fclose(archive);
     } else
-        printf("Error opening file. \n");
+        printf("Error opening file. INodes.dat\n");
 }
 
 void enterINodeFree(FreeINode **freeINode, INode *inode){
@@ -117,3 +116,39 @@ void removeINodeFree(FreeINode **freeInodes, INode *inode){
     }
 }
 
+int readINodeDat(FreeINode **fi, Directory **root){
+    FILE *archive;
+    archive = fopen("src/Resources/INodes.dat", "rb+");
+
+    if (archive == NULL) {
+        *fi = malloc(sizeof(FreeINode));
+        FreeINode *aux = *fi;
+        FreeINode *prev = NULL;
+        int resp;
+
+        while(resp){
+            INode *inode = NULL;
+            resp = fread(inode, sizeof(INode), 1, archive);
+
+            if (inode->status == 0) {
+                aux->inode = inode;
+                aux->next = malloc(sizeof(FreeINode));
+                prev = aux;    
+                aux = aux->next;
+            } else {
+                if(aux->inode->type == 'd'){
+                    if(!strcmp(aux->inode->name, "c"))
+                        *root = addDirectory(inode, NULL);
+                    else {
+                        
+                    }
+                }
+            }
+        }
+
+        prev->next = NULL;
+        free(aux);
+        return 1;   
+    } else
+        return 0;
+}
