@@ -14,25 +14,25 @@ void initFileSystem(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **
     *root = NULL;
     int flag = 0;
 
-    if(verifyDirectory("src/Blocks") && verifyDirectory("src/Resources")){
-        readBlockDat(freeBlocks);
-        
-        flag = readINodekDat(freeInodes, root);
-    } else {
+    if(verifyDirectory("src/Blocks") && verifyDirectory("src/Resources"))
+        flag = readINodeDat(freeInodes);
+    else {
         createDirectory("src/Blocks");
         createDirectory("src/Resources");    
     }
-    
+
     if (!flag) {
         generateBlocks(freeBlocks);
         generateInodes(freeInodes);
+    } else {
+        readBlockDat(freeBlocks);
+        readDirectoryDat(root);
     }
     
     if (*root == NULL)
         *root = generateRoot(freeInodes, freeBlocks);
     
-    
-    printf("Bash 0.5 [versao 3.2.0]\n\n");
+    printf("Bash 0.5 [versao 3.3.1]\n\n");
 }
 
 void format(char comand[]){
@@ -91,8 +91,7 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
         comand[10] = "", 
         argument[MAX_FILENAME], 
         entry[MAX_FILENAME * 2], 
-        path[100],
-        complete_path[100];
+        path[100];
 
     Directory *currentDirectory = *root;
     
@@ -114,23 +113,18 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
                 if (validateDirName(argument))
                     printf("Unknow charcter '/' or '\\'. \n\n");
                 else
-                    function_mkdir(path, argument, freeInodes, freeBlocks, currentDirectory);
+                    function_mkdir(argument, freeInodes, freeBlocks, currentDirectory);
             } else if (!strcmp(comand, "cd")) {
-                if (path[0] != '\0')
-                    snprintf(complete_path, sizeof(complete_path), "./c/%s/%s", path, argument);
-                else
-                    snprintf(complete_path, sizeof(complete_path), "c/%s", argument);
-
                 if (!strcmp(argument, "..")){
                     if (path[0] != '\0'){
                         currentDirectory = currentDirectory->parent;
                         format_path(path);
                     } else
-                        printf("Error: You are already in the root directory.\n");
+                        printf("Error: You are already in the root directory.\n\n");
                 } else if (!strcmp(argument, "/")){
                     path[0] = '\0';
                     currentDirectory = *root;
-                } else if (verifyDirFS(currentDirectory->iNodeList, complete_path)){
+                } else if (verifyDirFS(currentDirectory->iNodeList->next, argument)){
                     if (path[0] != '\0'){
                         path[strlen(path)] = '/';
 
@@ -139,9 +133,8 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
                     }
 
                     DirectoryList *aux = currentDirectory->childs;
-                    while (strcmp(aux->directory->name, argument) && aux != NULL){
+                    while (strcmp(aux->directory->name, argument) && aux != NULL)
                         aux = aux->next;
-                    }
 
                     if (aux == NULL || aux->directory == *root)
                         printf("Directory exists, but not found in current file system. \n\n");
@@ -149,7 +142,7 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
                         currentDirectory = aux->directory;
                         strcat(path, argument);
                     }
-                } else 
+                } else if (strcmp(argument, "."))
                     printf("The system could not find the specified path. \n\n");
             } else if (!strcmp(comand, "ls")) {
                 char all[MAX_I_NODE][2][FILENAME_MAX];

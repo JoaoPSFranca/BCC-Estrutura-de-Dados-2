@@ -13,12 +13,20 @@ int verifyDirectory(const char name[]) {
 }
 
 int verifyDirFS(INodeList *list, const char name[]){
-    INodeList *aux = list;
+    if (list != NULL) {
+        INodeList *aux = list;
+        int flag = 1;
 
-    while (strcmp(aux->inode->name, name) && aux != NULL)
-        aux = aux->next;
-    
-    return aux == NULL;
+        while (flag && aux != NULL){
+            if (!strcmp(aux->inode->name, name))
+                flag = 0;
+            else
+                aux = aux->next;
+        }
+
+        return aux != NULL;
+    } else
+        return 0;
 }
 
 int createDirectory(const char name[]){
@@ -29,7 +37,7 @@ int createDirectory(const char name[]){
     return 0;
 }
 
-void remove_dir(const char dirName[], const char path[], FreeBlock *fb) {
+void remove_dir(const char dirName[], const char path[]) {
     char completePath[MAX_FILENAME];
 
     if (path[0] != '\0')
@@ -58,7 +66,7 @@ Directory *addDirectory(INode *inode, Directory *parent){
     dir->parent = parent;
     dir->childs = NULL;
 
-    if(parent != NULL){
+    if(parent != NULL && parent->inode->id != inode->id){
         DirectoryList *dirList = malloc(sizeof(DirectoryList));
 
         dirList->directory = dir;
@@ -79,14 +87,88 @@ Directory *addDirectory(INode *inode, Directory *parent){
         while (aux2->next != NULL)
             aux2 = aux2->next;
 
-        aux2->next = inodeList;
+        INodeList *newNode = malloc(sizeof(INodeList));
+        newNode->inode = inode;
+        newNode->next = NULL;
 
+        aux2->next = newNode;
         (parent->childs_cont)++;
 
         return dir;
     }
 
     return dir;
+}
+
+void appendDir(Directory *dir){
+    FILE *archive;
+
+    archive = fopen("src/Resources/Directory.dat", "ab+");
+
+    if (archive != NULL) {
+        fwrite(dir, sizeof(Directory), 1, archive);
+
+        fclose(archive);
+    } else 
+        printf("Error opening Directory file. \n");
+    
+}
+
+void alterDirDat(Directory *dir){
+    FILE *archive;
+    archive = fopen("src/Resources/Directory.dat", "rb+");
+
+    if (archive != NULL) {
+        Directory aux;
+        int flag = 1;
+        int resp = 1;
+
+        while (flag && resp) {
+            resp = fread(&aux, sizeof(Directory), 1, archive);
+
+            if (aux.inode->id == dir->inode->id) {
+                fseek(archive, -sizeof(Directory), SEEK_CUR);
+                fwrite(dir, sizeof(Directory), 1, archive);
+                flag = 0;   
+            }
+        }
+
+        if (flag == 1 || resp != 1) {
+            printf("Error: Directory not found. ");
+        }
+        
+        fclose(archive);
+    } else
+        printf("Error opening Directory file. \n");
+}
+
+int readDirectoryDat(Directory **root){
+    FILE *archive;
+    archive = fopen("src/Resources/Directory.dat", "rb");
+
+    if (archive != NULL) {
+        int resp = 1;
+        int flag = 0;
+
+        while(flag && resp){
+            Directory *dir = malloc(sizeof(Directory));
+            resp = fread(dir, sizeof(Directory), 1, archive);
+
+            if (resp) {
+                printf("Nome Dir: %s\n", dir->name);
+                if (!strcmp(dir->name, "c")){
+                    *root = dir;
+                    flag = 0;
+                }
+            } else
+                free(dir);
+        }
+
+        return 1;   
+    } else {
+        printf("Error opening Directory file. \n");
+        return 0;
+    }
 }
 
 Directory *generateRoot(FreeINode **freeInodes, FreeBlock **freeBlocks){
@@ -113,19 +195,14 @@ Directory *generateRoot(FreeINode **freeInodes, FreeBlock **freeBlocks){
     root->parent = root;
     root->childs = NULL;
 
+    appendDir(root);
+
     return root;
 }
 
-void function_mkdir(char path[], char argument[], FreeINode **freeInodes, FreeBlock **freeBlocks, Directory *parent) {
-    char dir_name[MAX_FILENAME * 2];
-
-    if (path[0] != '\0')
-        snprintf(dir_name, sizeof(dir_name), "c/%s/%s", path, argument);
-    else
-        snprintf(dir_name, sizeof(dir_name), "c/%s", argument);
-    
+void function_mkdir(char argument[], FreeINode **freeInodes, FreeBlock **freeBlocks, Directory *parent) {    
     INode *inode = verifyINodeFree_Directory(freeInodes);
-
+    
     if (inode == NULL)
         printf("No Free INode avaible. \n");
     else {
@@ -134,7 +211,14 @@ void function_mkdir(char path[], char argument[], FreeINode **freeInodes, FreeBl
         if (block == NULL) {
             printf("No Free Blocks avaible. \n");
         } else {
-            if (verifyDirFS(parent->iNodeList, argument)) {
+            int flag;
+
+            if (parent == NULL || parent->iNodeList->next == NULL)
+                flag = 0;
+            else 
+                flag = verifyDirFS(parent->iNodeList->next, argument);
+
+            if (flag) {
                 printf("Error: Could not create the directory '%s'. \n\n", argument);
             } else {
                 removeINodeFree(freeInodes, inode);
@@ -145,7 +229,8 @@ void function_mkdir(char path[], char argument[], FreeINode **freeInodes, FreeBl
                 strcpy(inode->name, argument);
                 inode->size = 0;
 
-                addDirectory(inode, parent);
+                Directory *dir = addDirectory(inode, parent);
+                appendDir(dir);
             }
         } 
     }
@@ -221,4 +306,3 @@ void function_rmdir(char dirName[], Directory *currentDirectory, FreeBlock **fre
         }
     }
 }
-

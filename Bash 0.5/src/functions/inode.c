@@ -28,15 +28,20 @@ void generateInodes(FreeINode **freeInodes){
 
         fclose(archive);
     } else
-        printf("Error opening file\n");
+        printf("Error opening INode file. \n");
 }
 
 INode *verifyINodeFree_Directory(FreeINode **freeInodes){
     FreeINode *aux = *freeInodes;
+    int flag = 1;
 
-    while (aux->inode->type != 'd' && aux->inode->status != 0 && aux != NULL)
-        aux = aux->next;
-    
+    while (flag && aux != NULL){
+        if (aux->inode->type == 'd' && aux->inode->status == 0)
+            flag = 0;
+        else
+            aux = aux->next;
+    }
+
     if (aux == NULL)
         return NULL;
     
@@ -62,13 +67,12 @@ void alterINodeDat(INode *inode){
             }
         }
 
-        if (flag == 1 || resp != 1) {
+        if (flag == 1)
             printf("Error: INode not found. ");
-        }
         
         fclose(archive);
     } else
-        printf("Error opening file. INodes.dat\n");
+        printf("Error opening INode file. \n");
 }
 
 void enterINodeFree(FreeINode **freeINode, INode *inode){
@@ -88,17 +92,21 @@ void enterINodeFree(FreeINode **freeINode, INode *inode){
     alterINodeDat(inode);
 }
 
-void removeINodeFree(FreeINode **freeInodes, INode *inode){
-
+void removeINodeFree(FreeINode **freeInodes, INode *inode){ 
     if ((*freeInodes)->inode->id == inode->id) {
         (*freeInodes) = (*freeInodes)->next;
     } else {
         FreeINode *aux = *freeInodes;
         FreeINode *aux2 = NULL;
+        int flag = 1;
 
-        while (aux->inode->id != inode->id && aux != NULL){
-            aux2 = aux;
-            aux = aux->next;
+        while (flag && aux != NULL){
+            if(aux->inode->id == inode->id)
+                flag = 0;
+            else {
+                aux2 = aux;
+                aux = aux->next;
+            }
         }
 
         if (aux != NULL){
@@ -116,39 +124,41 @@ void removeINodeFree(FreeINode **freeInodes, INode *inode){
     }
 }
 
-int readINodeDat(FreeINode **fi, Directory **root){
+int readINodeDat(FreeINode **fi){
     FILE *archive;
-    archive = fopen("src/Resources/INodes.dat", "rb+");
+    archive = fopen("src/Resources/INodes.dat", "rb");
 
-    if (archive == NULL) {
-        *fi = malloc(sizeof(FreeINode));
-        FreeINode *aux = *fi;
-        FreeINode *prev = NULL;
-        int resp;
-
+    if (archive != NULL) {
+        *fi = NULL;
+        FreeINode *aux = NULL;
+        int resp = 1;
+        
         while(resp){
-            INode *inode = NULL;
+            INode *inode = malloc(sizeof(INode));
             resp = fread(inode, sizeof(INode), 1, archive);
 
-            if (inode->status == 0) {
-                aux->inode = inode;
-                aux->next = malloc(sizeof(FreeINode));
-                prev = aux;    
-                aux = aux->next;
-            } else {
-                if(aux->inode->type == 'd'){
-                    if(!strcmp(aux->inode->name, "c"))
-                        *root = addDirectory(inode, NULL);
-                    else {
-                        
-                    }
-                }
-            }
-        }
+            if (inode->status == 0 && resp) {
+                FreeINode *newNode = malloc(sizeof(FreeINode));
+                newNode->inode = inode;
+                newNode->next = NULL;
 
-        prev->next = NULL;
-        free(aux);
+                if (*fi == NULL) 
+                    *fi = newNode;
+                else
+                    aux->next = newNode;
+
+                aux = newNode;
+            } else 
+                free(inode);
+        }
+        
+        if (aux != NULL)
+            aux->next = NULL;
+
+        fclose(archive);
         return 1;   
-    } else
+    } else {
+        printf("Error opening INode file to read. \n");
         return 0;
+    }
 }

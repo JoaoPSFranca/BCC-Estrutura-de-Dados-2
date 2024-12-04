@@ -24,21 +24,24 @@ void generateBlocks(FreeBlock **freeBlocks){
             if (i < MAX_BLOCKS - 1) {
                 aux->next = malloc(sizeof(FreeBlock));
                 aux = aux->next;
-            } else {
-                aux->next = NULL; 
-            }
-            free(block);
-        } else {
+            } else
+                aux->next = NULL;
+            
+        } else
             printf("Error opening file. \n");
-        }
     }
 }
 
 Block *verifyBlockFree(FreeBlock **freeBlocks){
     FreeBlock *aux = *freeBlocks;
+    int flag = 1;
 
-    while (aux->block->status != 0 && aux != NULL)
-        aux = aux->next;
+    while (flag && aux != NULL){
+        if (aux->block->status == 0)
+            flag = 0;
+        else
+            aux = aux->next;
+    }
     
     if (aux == NULL)
         return NULL;
@@ -104,13 +107,10 @@ void removeBlockFree(FreeBlock **freeBlocks, Block *block){
 }
 
 void readBlockDat(FreeBlock **fb){
-    *fb = malloc(sizeof(FreeBlock));
-    FreeBlock *aux = *fb;
+    *fb = NULL;
+    FreeBlock *aux = NULL;
 
     for (unsigned int i = 0; i < MAX_BLOCKS; i++) {
-        aux->next = NULL;
-        aux->block = NULL;
-        
         FILE *archive;
         char filename[70];
 
@@ -119,21 +119,22 @@ void readBlockDat(FreeBlock **fb){
         archive = fopen(filename, "rb");
 
         if (archive != NULL) {
-            Block *block = NULL;
-
+            Block *block = malloc(sizeof(Block));
             fread(block, sizeof(Block), 1, archive);
             
             if(block->status == 0){
-                aux->block = block;
+                FreeBlock *newNode = malloc(sizeof(FreeBlock));
+                newNode->block = block;
+                newNode->next = NULL;
 
-                if (i < MAX_BLOCKS - 1) {
-                    aux->next = malloc(sizeof(FreeBlock));
-                    aux = aux->next;
-                } else 
-                    aux->next = NULL;
-
+                if (*fb == NULL)
+                    *fb = newNode;    
+                else
+                    aux->next = newNode;
+                
+                aux = newNode;
+            } else
                 free(block);
-            }
 
             fclose(archive);
         } else {
@@ -141,19 +142,23 @@ void readBlockDat(FreeBlock **fb){
 
             if (archive != NULL) {
                 Block *block = malloc(sizeof(Block));
+                FreeBlock *newNode = malloc(sizeof(FreeBlock));
+                
                 strcpy(block->address, filename);
                 block->status = 0; // free block
 
                 fwrite(block, sizeof(Block), 1, archive);
-                aux->block = block;
 
-                if (i < MAX_BLOCKS - 1) {
-                    aux->next = malloc(sizeof(FreeBlock));
-                    aux = aux->next;
-                } else 
-                    aux->next = NULL; 
+                newNode->block = block;
+                newNode->next = NULL;
 
-                free(block);
+                if (*fb == NULL)
+                    *fb = newNode;    
+                else
+                    aux->next = newNode;
+                
+                aux = newNode;
+                
                 fclose(archive);
             } else {
                 printf("Error opening file. %s\n", filename);
