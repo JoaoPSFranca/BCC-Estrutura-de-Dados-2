@@ -1,14 +1,17 @@
-/* Caso esteja utilizando o Compile Run no vscode:
+/* 
+Caso esteja utilizando o Compile Run no vscode:
     acesse a propriedade:
         @ext:danielpinto8zz6.c-cpp-compile-run C-cpp-compile-run: Output-location 
-    apague o campo caso esteja por padrão no output, deixe em .. */
+    apague o campo caso esteja por padrão no output, deixe em .. 
+De preferência rodar também em terminal externo
+*/
 
 #include <string.h>
 #include <ctype.h>
 
-#include "functions/block.c"
-#include "functions/inode.c"
-#include "functions/directory.c"
+#include "functions/JoaoFrancaBlock.c"
+#include "functions/JoaoFrancaInode.c"
+#include "functions/JoaoFrancaDirectory.c"
 
 void initFileSystem(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root) {
     *root = NULL;

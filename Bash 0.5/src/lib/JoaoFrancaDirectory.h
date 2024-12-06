@@ -1,7 +1,7 @@
 #ifndef DIRECTORY_H
 #define DIRECTORY_H
 
-#include "inode.h"
+#include "JoaoFrancaInode.h"
 
 struct sDirectory;
 

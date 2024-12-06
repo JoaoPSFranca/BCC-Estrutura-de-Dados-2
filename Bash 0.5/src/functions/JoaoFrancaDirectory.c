@@ -1,6 +1,6 @@
 #include <sys/stat.h>
 
-#include "../lib/directory.h"
+#include "../lib/JoaoFrancaDirectory.h"
 
 int verifyDirectory(const char name[]) {
     struct stat st;
@@ -71,6 +71,7 @@ Directory *addDirectory(INode *inode, Directory *parent){
 
         dirList->directory = dir;
         dirList->next = NULL;
+        parent->inode->blocks[parent->inode->block_count++] = inode->blocks[0];
 
         if(parent->childs != NULL){
             DirectoryList *aux = parent->childs;
@@ -148,18 +149,17 @@ int readDirectoryDat(Directory **root){
 
     if (archive != NULL) {
         int resp = 1;
-        int flag = 0;
 
-        while(flag && resp){
+        while(resp){
             Directory *dir = malloc(sizeof(Directory));
             resp = fread(dir, sizeof(Directory), 1, archive);
 
             if (resp) {
                 printf("Nome Dir: %s\n", dir->name);
-                if (!strcmp(dir->name, "c")){
+                if (!strcmp(dir->name, "c"))
                     *root = dir;
-                    flag = 0;
-                }
+                else
+                    addDirectory(dir->inode, dir->parent);
             } else
                 free(dir);
         }

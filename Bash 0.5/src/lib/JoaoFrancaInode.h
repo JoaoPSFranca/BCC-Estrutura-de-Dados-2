@@ -1,7 +1,7 @@
 #ifndef INODE_H
 #define INODE_H
 
-#include "block.h"
+#include "JoaoFrancaBlock.h"
 #define MAX_FILENAME 256
 
 typedef struct sINode {

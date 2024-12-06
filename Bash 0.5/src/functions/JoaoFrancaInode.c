@@ -1,4 +1,4 @@
-#include "../lib/inode.h"
+#include "../lib/JoaoFrancaInode.h"
 
 void generateInodes(FreeINode **freeInodes){
     FILE *archive;
