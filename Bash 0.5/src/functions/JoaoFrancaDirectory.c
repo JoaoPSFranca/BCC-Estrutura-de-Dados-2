@@ -29,6 +29,39 @@ int verifyDirFS(INodeList *list, const char name[]){
         return 0;
 }
 
+void alterDirDat(Directory *dir){
+    FILE *archive;
+    archive = fopen("src/Resources/Directory.dat", "rb+");
+
+    printf("Teste 1\n");
+    if (archive != NULL) {
+        printf("Teste 2\n");
+        int flag = 1;
+        int resp = 1;
+
+        printf("Teste 3\n");
+        while (flag && resp) {
+            Directory *aux = malloc(sizeof(Directory));
+            resp = fread(aux, sizeof(Directory), 1, archive);
+
+            if (aux->inode->id == dir->inode->id) {
+                fseek(archive, -sizeof(Directory), SEEK_CUR);
+                fwrite(dir, sizeof(Directory), 1, archive);
+                flag = 0;   
+            }
+        }
+
+        printf("Teste 4\n");
+        if (flag == 1 || resp != 1) {
+            printf("Error: Directory not found. ");
+        }
+        
+        printf("Teste 5\n");
+        fclose(archive);
+    } else
+        printf("Error opening Directory file. \n");
+}
+
 int createDirectory(const char name[]){
     if (!verifyDirectory(name))
         if (!mkdir(name, 755))
@@ -71,7 +104,7 @@ Directory *addDirectory(INode *inode, Directory *parent){
 
         dirList->directory = dir;
         dirList->next = NULL;
-        parent->inode->blocks[parent->inode->block_count++] = inode->blocks[0];
+        parent->inode->blocks[(parent->inode->block_count)++] = inode->blocks[0];
 
         if(parent->childs != NULL){
             DirectoryList *aux = parent->childs;
@@ -95,6 +128,7 @@ Directory *addDirectory(INode *inode, Directory *parent){
         aux2->next = newNode;
         (parent->childs_cont)++;
 
+        // alterDirDat(dir->parent);
         return dir;
     }
 
@@ -113,34 +147,6 @@ void appendDir(Directory *dir){
     } else 
         printf("Error opening Directory file. \n");
     
-}
-
-void alterDirDat(Directory *dir){
-    FILE *archive;
-    archive = fopen("src/Resources/Directory.dat", "rb+");
-
-    if (archive != NULL) {
-        Directory aux;
-        int flag = 1;
-        int resp = 1;
-
-        while (flag && resp) {
-            resp = fread(&aux, sizeof(Directory), 1, archive);
-
-            if (aux.inode->id == dir->inode->id) {
-                fseek(archive, -sizeof(Directory), SEEK_CUR);
-                fwrite(dir, sizeof(Directory), 1, archive);
-                flag = 0;   
-            }
-        }
-
-        if (flag == 1 || resp != 1) {
-            printf("Error: Directory not found. ");
-        }
-        
-        fclose(archive);
-    } else
-        printf("Error opening Directory file. \n");
 }
 
 int readDirectoryDat(Directory **root){
@@ -172,7 +178,7 @@ int readDirectoryDat(Directory **root){
 }
 
 Directory *generateRoot(FreeINode **freeInodes, FreeBlock **freeBlocks){
-    INode *inode = verifyINodeFree_Directory(freeInodes);
+    INode *inode = verifyINodeFree(freeInodes, 'd');
     Block *block = verifyBlockFree(freeBlocks);
     INodeList *inodeList = malloc(sizeof(INodeList));
 
@@ -201,7 +207,7 @@ Directory *generateRoot(FreeINode **freeInodes, FreeBlock **freeBlocks){
 }
 
 void function_mkdir(char argument[], FreeINode **freeInodes, FreeBlock **freeBlocks, Directory *parent) {    
-    INode *inode = verifyINodeFree_Directory(freeInodes);
+    INode *inode = verifyINodeFree(freeInodes, 'd');
     
     if (inode == NULL)
         printf("No Free INode avaible. \n");
@@ -221,9 +227,6 @@ void function_mkdir(char argument[], FreeINode **freeInodes, FreeBlock **freeBlo
             if (flag) {
                 printf("Error: Could not create the directory '%s'. \n\n", argument);
             } else {
-                removeINodeFree(freeInodes, inode);
-                removeBlockFree(freeBlocks, block);
-
                 inode->block_count = 1;
                 inode->blocks[0] = *block;
                 strcpy(inode->name, argument);
@@ -231,6 +234,8 @@ void function_mkdir(char argument[], FreeINode **freeInodes, FreeBlock **freeBlo
 
                 Directory *dir = addDirectory(inode, parent);
                 appendDir(dir);
+                removeINodeFree(freeInodes, inode);
+                removeBlockFree(freeBlocks, block);
             }
         } 
     }
@@ -302,6 +307,7 @@ void function_rmdir(char dirName[], Directory *currentDirectory, FreeBlock **fre
             free(aux2);            
             free(dirToRemove);
             free(toRemove);
+            // alterDirDat(dirParent);
             // remove_dir(dirName, path, *freeBlock);
         }
     }

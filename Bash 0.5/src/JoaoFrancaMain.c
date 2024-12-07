@@ -18,21 +18,23 @@ void initFileSystem(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **
     int flag = 0;
 
     if(verifyDirectory("src/Blocks") && verifyDirectory("src/Resources"))
-        flag = readINodeDat(freeInodes);
+        flag = 1;
+        // flag = readINodeDat(freeInodes);
     else {
         createDirectory("src/Blocks");
         createDirectory("src/Resources");    
     }
 
-    if (!flag) {
+    // if (!flag) {
         generateBlocks(freeBlocks);
         generateInodes(freeInodes);
-    } else {
-        readBlockDat(freeBlocks);
-        readDirectoryDat(root);
-    }
+    // } 
+    // else {
+    //     // readBlockDat(freeBlocks);
+    //     // readDirectoryDat(root);
+    // }
     
-    if (*root == NULL)
+    // if (*root == NULL)
         *root = generateRoot(freeInodes, freeBlocks);
     
     printf("Bash 0.5 [versao 3.3.1]\n\n");
@@ -89,12 +91,36 @@ int validateDirName(char argument[]){
     return flag;
 }
 
+int validateFileName(char fileName[]){
+    unsigned int i;
+    int flag = 0;
+
+    for (i = 0; i < strlen(fileName); i++) {
+        if (fileName[i] == '.')
+            flag = 1;
+    }
+
+    return flag;
+}
+
+int verifyArgumentCat(char argument[]){
+    unsigned int i;
+    int flag = 0;
+
+    for (i = 0; i < strlen(argument); i++)
+        if (argument[i] == '>')
+            flag = 1;
+
+    return flag;
+}
+
 void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
     char 
         comand[10] = "", 
-        argument[MAX_FILENAME], 
+        argument[MAX_FILENAME + 7], 
         entry[MAX_FILENAME * 2], 
-        path[100];
+        path[100],
+        fileName[MAX_FILENAME];
 
     Directory *currentDirectory = *root;
     
@@ -103,8 +129,8 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
     while (strcmp(comand, "exit")) {
         printf("c:/%s>", path);
 
-        fgets(entry, 50, stdin);
-        sscanf(entry, "%s %s", comand, argument);
+        fgets(entry, sizeof(entry), stdin);
+        sscanf(entry, "%s %[^\n]", comand, argument);
 
         comand[strcspn(comand, "\n")] = '\0'; 
 
@@ -114,7 +140,7 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
         else {
             if (!strcmp(comand, "mkdir")) {
                 if (validateDirName(argument))
-                    printf("Unknow charcter '/' or '\\'. \n\n");
+                    printf("Invalid charcter '/' or '\\'. \n\n");
                 else
                     function_mkdir(argument, freeInodes, freeBlocks, currentDirectory);
             } else if (!strcmp(comand, "cd")) {
@@ -153,15 +179,37 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
                 function_ls(all, currentDirectory, &countDir, &countReg);
                 print_ls(all, countDir, countReg);
             } else if (!strcmp(comand, "cat")) {
-                
+                if (verifyArgumentCat(argument)) { // create file
+                    sscanf(argument, "> %s", fileName);
+                    
+                    if (validateDirName(fileName))
+                        printf("Invalid charcter '/' or '\\'. \n\n");
+                    else if(!validateFileName(fileName))
+                        printf("Missing file extension. \n\n");
+                    else
+                        function_cat_create(fileName, currentDirectory, freeInodes, freeBlocks);
+
+                    // alterDirDat(currentDirectory);
+                } else { // open file
+                    sscanf(argument, "%s", fileName);
+
+                    INode *inode = searchFile(&(currentDirectory->iNodeList), fileName);
+
+                    if (inode == NULL)
+                        printf("File not found. \n\n");
+                    else {
+                        printf("File Found. ");
+                        function_cat_show(inode);
+                    }
+                }
             } else if (!strcmp(comand, "rm")) {
-                
+                printf("Coming soon. Not implemented yet. \n\n");
             } else if (!strcmp(comand, "rmdir")) {
                 function_rmdir(argument, currentDirectory, freeBlocks, freeInodes);
             } else if (!strcmp(comand, "mv")) {
-                
+                printf("Coming soon. Not implemented yet. \n\n");
             } else if (!strcmp(comand, "run")) {
-                
+                printf("Coming soon. Not implemented yet. \n\n");
             } else if (!strcmp(comand, "cls") || !strcmp(comand, "clear")){
                 system("cls");
             } else if (strcmp(comand, "exit")) {
