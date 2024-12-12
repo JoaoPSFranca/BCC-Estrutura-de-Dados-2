@@ -22,15 +22,15 @@ De preferência rodar também em terminal externo
 
 void initFileSystem(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root) {
     *root = NULL;
-    int flag = 0;
+    // int flag = 0;
 
-    if(verifyDirectory("src/Blocks") && verifyDirectory("src/Resources"))
-        flag = 1;
+    if(!verifyDirectory("src/Blocks") && !verifyDirectory("src/Resources"))
+        // flag = 1;
         // flag = readINodeDat(freeInodes);
-    else {
+    // else {
         createDirectory("src/Blocks");
         createDirectory("src/Resources");    
-    }
+    // }
 
     // if (!flag) {
         generateBlocks(freeBlocks);
