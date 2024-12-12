@@ -6,12 +6,19 @@ Caso esteja utilizando o Compile Run no vscode:
 De preferência rodar também em terminal externo
 */
 
+/* 
+    bug de dar backspace mais de uma vez
+    Implementar o mv
+    Implementar o run
+*/ 
+
 #include <string.h>
 #include <ctype.h>
 
 #include "functions/JoaoFrancaBlock.c"
 #include "functions/JoaoFrancaInode.c"
 #include "functions/JoaoFrancaDirectory.c"
+#include "functions/JoaoFrancaFile.c"
 
 void initFileSystem(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root) {
     *root = NULL;
@@ -197,13 +204,18 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
 
                     if (inode == NULL)
                         printf("File not found. \n\n");
-                    else {
-                        printf("File Found. ");
+                    else
                         function_cat_show(inode);
-                    }
                 }
             } else if (!strcmp(comand, "rm")) {
-                printf("Coming soon. Not implemented yet. \n\n");
+                sscanf(argument, "%s", fileName);
+
+                INode *inode = searchFile(&(currentDirectory->iNodeList), fileName);
+
+                if (inode == NULL)
+                    printf("File not found. \n\n");
+                else
+                    function_rm(inode, currentDirectory, freeBlocks, freeInodes);
             } else if (!strcmp(comand, "rmdir")) {
                 function_rmdir(argument, currentDirectory, freeBlocks, freeInodes);
             } else if (!strcmp(comand, "mv")) {
