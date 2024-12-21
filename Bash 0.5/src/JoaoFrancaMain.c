@@ -222,12 +222,18 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
                 char newName[MAX_FILENAME];
                 sscanf(argument, "%s %s", fileName, newName);
 
-                INode *inode = searchFile(&(currentDirectory->iNodeList), fileName);
+                if (validateDirName(newName))
+                    printf("Invalid charcter '/' or '\\'. \n\n");
+                else if(!validateFileName(newName))
+                    printf("Missing file extension. \n\n");
+                else {
+                    INode *inode = searchFile(&(currentDirectory->iNodeList), fileName);
 
-                if (inode == NULL)
-                    printf("File not found. \n\n");
-                else
-                    function_mv(inode, newName, &currentDirectory);
+                    if (inode == NULL)
+                        printf("File not found. \n\n");
+                    else
+                        function_mv(inode, newName, &currentDirectory);
+                }
             } else if (!strcmp(comand, "run")) {
                 printf("Coming soon. Not implemented yet. \n\n");
             } else if (!strcmp(comand, "cls") || !strcmp(comand, "clear")){
