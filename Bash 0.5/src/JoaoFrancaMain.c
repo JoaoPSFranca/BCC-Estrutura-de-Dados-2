@@ -219,7 +219,15 @@ void bash(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **root){
             } else if (!strcmp(comand, "rmdir")) {
                 function_rmdir(argument, currentDirectory, freeBlocks, freeInodes);
             } else if (!strcmp(comand, "mv")) {
-                printf("Coming soon. Not implemented yet. \n\n");
+                char newName[MAX_FILENAME];
+                sscanf(argument, "%s %s", fileName, newName);
+
+                INode *inode = searchFile(&(currentDirectory->iNodeList), fileName);
+
+                if (inode == NULL)
+                    printf("File not found. \n\n");
+                else
+                    function_mv(inode, newName, &currentDirectory);
             } else if (!strcmp(comand, "run")) {
                 printf("Coming soon. Not implemented yet. \n\n");
             } else if (!strcmp(comand, "cls") || !strcmp(comand, "clear")){

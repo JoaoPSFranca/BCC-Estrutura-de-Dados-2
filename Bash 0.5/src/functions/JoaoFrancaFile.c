@@ -134,3 +134,20 @@ void function_rm(INode *inode, Directory *dir, FreeBlock **freeBlock, FreeINode 
     
     enterINodeFree(freeINode, inode);
 }
+
+void function_mv(INode *inode, char newName[], Directory **parent){
+    if(inode->type == 'd'){
+        DirectoryList *aux = (*parent)->childs;
+
+        while(aux != NULL && aux->directory->inode->id != inode->id)
+            aux = aux->next;
+
+        if (aux != NULL){
+            strcpy(aux->directory->name, newName);
+            // alterDirDat(aux->directory);
+        }
+    }
+
+    strcpy(inode->name, newName);
+    alterINodeDat(inode);
+}
