@@ -17,7 +17,7 @@ INode *searchFile(INodeList **list, char fileName[MAX_FILENAME]) {
         return aux->inode;
 }
 
-int readCatCreate(Block *block, INode *inode){
+int readCatCreate(Block *block, INode *inode, int *count){
     int run = 1;
     int full = 0;
     int verify = 0;
@@ -50,6 +50,8 @@ int readCatCreate(Block *block, INode *inode){
                 full = 1;
         } 
     }
+    
+    *count += i;
 
     block->data[i] = '\0';
     inode->blocks[(inode->block_count)++] = *block;
@@ -62,9 +64,48 @@ int readCatCreate(Block *block, INode *inode){
     return run;
 }
 
+INode *generate_script_sh(FreeBlock **freeBlocks, FreeINode **freeInodes) {
+    INode *inode = verifyINodeFree(freeInodes, 'r');
+    int flag = 1;
+    unsigned int j = 0;
+    const char script[] = "mkdir teste\nmkdir teste2\nmkdir teste3\nls\nrmdir teste2\nls\ncd teste\nmkdir teste4\nls\ncd ..\nls";
+
+    while (flag) {
+        Block *block = verifyBlockFree(freeBlocks);
+        int i = 0;
+
+        if (block == NULL) {
+            printf("No Free Blocks avaible. \n");
+            flag = 0;
+        } else { 
+            for (i = 0; i < BLOCK_SIZE - 1; i++) {
+                block->data[i] = script[j];
+                j++;
+
+                if (j >= strlen(script)){
+                    flag = 0;
+                    i = BLOCK_SIZE;
+                }
+            }
+            
+            block->data[i] = '\0';
+            removeBlockFree(freeBlocks, block);
+            inode->blocks[(inode->block_count)++] = *block;
+        }
+    }
+
+    strcpy(inode->name, "script.sh");
+    inode->size = j;
+
+    removeINodeFree(freeInodes, inode);
+
+    return inode;
+}
+
 void function_cat_create(char fileName[], Directory *dir, FreeINode **fi, FreeBlock **fb) {
     INode *inode = verifyINodeFree(fi, 'r');
     int flag = 1;
+    int count = 0;
 
     if (inode == NULL)
         printf("No Free INode avaible. \n");
@@ -76,13 +117,14 @@ void function_cat_create(char fileName[], Directory *dir, FreeINode **fi, FreeBl
                 printf("No Free Blocks avaible. \n");
                 flag = 0;
             } else { 
-                flag = readCatCreate(block, inode);
+                flag = readCatCreate(block, inode, &count);
                 removeBlockFree(fb, block);
             }   
         }
         printf("\n");
 
         strcpy(inode->name, fileName);
+        inode->size = count;
 
         removeINodeFree(fi, inode);
         INodeList *aux = dir->iNodeList;
@@ -150,4 +192,12 @@ void function_mv(INode *inode, char newName[], Directory **parent){
 
     strcpy(inode->name, newName);
     alterINodeDat(inode);
+}
+
+void function_run(INode *inode, char command[]){
+    int i;
+    
+    for (i = 0; i < inode->block_count; i++){
+        strcat(command, inode->blocks[i].data);
+    }
 }
