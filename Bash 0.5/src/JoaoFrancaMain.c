@@ -7,7 +7,6 @@ De preferência rodar também em terminal externo
 */
 
 /* 
-    bug de dar backspace mais de uma vez
     fazer carregar os arquivos dat
 */ 
 
