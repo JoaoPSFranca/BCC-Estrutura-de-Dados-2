@@ -17,10 +17,9 @@ INode *searchFile(INodeList **list, char fileName[MAX_FILENAME]) {
         return aux->inode;
 }
 
-int readCatCreate(Block *block, INode *inode, int *count){
+void readCatCreate(char vet[], int *count){
     int run = 1;
     int full = 0;
-    int verify = 0;
     int i = 0;
 
     while (!full && run) {
@@ -29,38 +28,59 @@ int readCatCreate(Block *block, INode *inode, int *count){
         if (entry == 04) 
             run = 0;
         else {
-            if (!verify)
-                verify = 1;
-            
             if (entry == 13){
                 printf("\n");
-                block->data[i++] = '\n';
+                vet[i++] = '\n';
             } else if (entry == 8){
                 if (i > 0) {
                     i--;
-                    block->data[i] = '\0';
+                    vet[i] = '\0';
                     printf("\b \b");
                 }
             } else if(entry > 31 && entry < 127) {
                 printf("%c", entry);
-                block->data[i++] = entry;
+                vet[i++] = entry;
             }
             
-            if (i == (BLOCK_SIZE - 1))
+            if (i == (BLOCK_SIZE * 14))
                 full = 1;
         } 
     }
     
     *count += i;
 
-    block->data[i] = '\0';
-    inode->blocks[(inode->block_count)++] = *block;
+    vet[i] = '\0';
 
-    if (inode->block_count == 15){
+    if (full) {
         printf("Your file reach the max size. ");
         run = 0;
     }
+}
 
+int writeBlock(INode *inode, Block *block, char vet[], int *j, int count) {
+    int 
+        run = 1,
+        flag = 1,
+        i = 0;
+
+    while (run && flag) {
+        block->data[i++] = vet[*j];
+        (*j)++;
+
+        if (i == 14) {
+            block->data[i] = '\0';
+            flag = 0;
+        }
+
+        if (*j == count) {
+            run = 0;
+            block->data[i] = '\0';
+        }
+    }
+
+    inode->blocks[inode->block_count] = *block;
+    inode->block_count = inode->block_count + 1;
+    
     return run;
 }
 
@@ -110,6 +130,10 @@ void function_cat_create(char fileName[], Directory *dir, FreeINode **fi, FreeBl
     if (inode == NULL)
         printf("No Free INode avaible. \n");
     else {
+        char vet[BLOCK_SIZE * 15];
+        int j = 0;
+        readCatCreate(vet, &count);
+
         while (flag) {
             Block *block = verifyBlockFree(fb);
 
@@ -117,7 +141,7 @@ void function_cat_create(char fileName[], Directory *dir, FreeINode **fi, FreeBl
                 printf("No Free Blocks avaible. \n");
                 flag = 0;
             } else { 
-                flag = readCatCreate(block, inode, &count);
+                flag = writeBlock(inode, block, vet, &j, count);
                 removeBlockFree(fb, block);
             }   
         }

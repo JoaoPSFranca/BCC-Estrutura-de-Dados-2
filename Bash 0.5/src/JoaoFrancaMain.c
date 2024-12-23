@@ -45,7 +45,7 @@ void initFileSystem(FreeBlock **freeBlocks, FreeINode **freeInodes, Directory **
         *runSH = generate_script_sh(freeBlocks, freeInodes);
     // }
 
-    printf("Bash 0.5 [versao 3.5.3]\n\n");
+    printf("Bash 0.5 [versao 3.5.5]\n\n");
 }
 
 void format(char comand[]){
